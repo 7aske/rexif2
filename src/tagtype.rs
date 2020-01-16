@@ -1,6 +1,6 @@
 use std::fmt::{Formatter, Error};
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Copy, Clone)]
 pub enum TagType {
     /// 315// ASCII
     Artist,

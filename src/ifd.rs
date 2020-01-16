@@ -4,6 +4,8 @@ use std::io::{Read, BufReader};
 use crate::endianness::{BigEndian, LittleEndian, Endian};
 use crate::tag::Tag;
 use core::fmt;
+use crate::tagtype::TagType;
+use byteorder::ByteOrder;
 
 pub struct Ifd {
     num_dir_ent: u16,
@@ -40,6 +42,15 @@ impl Ifd {
             tags,
             next_ifd,
         }
+    }
+    pub fn next_ifd_ptr(&self) -> u32 {
+        let out: u32 = 0;
+        for tag in &self.tags {
+            if tag.tid == TagType::ExifIFDPointer {
+                return byteorder::BigEndian::read_u32(&tag.data);
+            }
+        }
+        out
     }
 }
 

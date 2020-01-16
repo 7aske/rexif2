@@ -33,9 +33,17 @@ impl Tiff {
 
         let end = if byte::BigEndian::read_u16(&buf[..2]) == 19789 { Endianness::BigEndian } else { Endianness::LittleEndian };
         let header = Header::new(&buf, end);
-        let ifd = Ifd::new(&mut f, end.clone(), offset);
+        let mut ifd = Ifd::new(&mut f, end.clone(), offset);
         let mut tiff = Tiff::new(header, end.clone(), offset);
-        tiff.files.push(ifd);
+        let mut next_ptr = ifd.next_ifd_ptr() as u64;
+        while next_ptr != 0 {
+            f.seek(SeekFrom::Start(next_ptr));
+            tiff.files.push(ifd);
+            ifd = Ifd::new(&mut f, end.clone(), offset);
+            next_ptr = ifd.next_ifd_ptr() as u64;
+        }
+//        tiff.files.push(ifd);
+
         return tiff;
     }
 //    pub fn print_tags(&self) {

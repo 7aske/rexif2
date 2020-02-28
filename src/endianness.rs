@@ -88,3 +88,6 @@ impl Endian for LittleEndian {
         };
     }
 }
+
+#[derive(Debug, Clone)]
+pub struct EndiannessError;

@@ -19,6 +19,7 @@ impl Ifd {
         let mut tags: Vec<Tag> = Vec::new();
         let next_ifd: u32;
 
+        // Get the number of IFD entries
         if endianness == Endianness::BigEndian {
             num_dir_ent = BigEndian::read_u16(f);
         } else {
@@ -37,7 +38,7 @@ impl Ifd {
             next_ifd = LittleEndian::read_u32(f);
         }
 
-        Ifd {
+        return Ifd {
             num_dir_ent,
             tags,
             next_ifd,
@@ -50,7 +51,7 @@ impl Ifd {
                 return byteorder::BigEndian::read_u32(&tag.data);
             }
         }
-        out
+        return out
     }
 }
 

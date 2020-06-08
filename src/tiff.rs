@@ -5,13 +5,14 @@ use byteorder as byte;
 use byteorder::ByteOrder;
 use core::fmt;
 use crate::header::Header;
-use crate::header;
 use crate::ifd::Ifd;
 use crate::tagtype::{TagType, TagTypeSize};
 use std::fs::File;
 use std::io::{Read, BufReader, SeekFrom, Seek};
 use std::process::exit;
 
+/// Rust struct representation of TIFF metadata information
+///
 pub struct Tiff {
     pub header: Header,
     pub files: Vec<Ifd>,
@@ -39,13 +40,13 @@ impl Tiff {
         let header = Header::new(&header_buffer)?;
         let mut ifd = Ifd::new(&mut file_reader, endianness.clone(), offset);
         let mut tiff = Tiff::new(header, endianness.clone(), offset);
-        let mut next_ptr = ifd.next_ifd_ptr() as u64;
+        let mut next_ptr = ifd.next_exif_ifd_ptr() as u64;
 
         while next_ptr != 0 {
             file_reader.seek(SeekFrom::Start(next_ptr));
             tiff.files.push(ifd);
             ifd = Ifd::new(&mut file_reader, endianness.clone(), offset);
-            next_ptr = ifd.next_ifd_ptr() as u64;
+            next_ptr = ifd.next_exif_ifd_ptr() as u64;
         }
 
         return Ok(tiff);

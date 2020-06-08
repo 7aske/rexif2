@@ -17,7 +17,7 @@ pub enum TagType {
     /// 320// SHORT
     ColorMap,
     /// 301// SHORT
-//    ColorResponseCurve,
+    //    ColorResponseCurve,
     /// 300// SHORT
     ColorResponseUnit,
     /// 259// SHORT
@@ -494,7 +494,7 @@ impl From<u16> for TagType {
             40964 => TagType::RelatedSoundFile,
             42016 => TagType::ImageUniqueID,
             _ => {
-                println!("{} {0:x}", num);
+                println!("Unknown ID - dec: {}, hex: {0:x}", num);
                 TagType::ERROR
             }
         };

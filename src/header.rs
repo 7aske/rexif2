@@ -5,35 +5,57 @@ use core::fmt;
 use std::error::Error;
 use std::{error, io};
 use crate::constants::{TIFF_II, TIFF_MM};
+use std::fs::read_to_string;
 
+/// Rust struct representation of TIFF standard header.
+///
+/// C equivalent:
+/// ```c
+/// typedef struct _TiffHeader {
+/// 	WORD Identifier;
+/// 	WORD Version;
+/// 	DWORD IFDOffset;
+/// } TIFHEAD;
+/// ```
 pub struct Header {
     pub identifier: u16,
     pub version: u16,
     pub ifd_offset: u32,
 }
 
-
 impl Header {
+    /// Parses a TIFF Header struct from an 8-byte buffer reference.
+    ///
+    /// # Arguments
+    ///
+    /// * `buf` - Buffer reference that should conform with TIFF standard.
+    ///
     pub fn new(buf: &[u8; 8]) -> Result<Self, EndiannessError> {
         let identifier: u16;
         let version: u16;
         let ifd_offset: u32;
-        let endianness = Header::endianness(&buf[..2])?;
 
-        if endianness == Endianness::BigEndian {
-            identifier = byte::BigEndian::read_u16(&buf[..2]);
-            version = byte::BigEndian::read_u16(&buf[2..4]);
-            ifd_offset = byte::BigEndian::read_u32(&buf[4..8]);
-        } else if endianness == Endianness::LittleEndian {
-            identifier = byte::LittleEndian::read_u16(&buf[..2]);
-            version = byte::LittleEndian::read_u16(&buf[2..4]);
-            ifd_offset = byte::LittleEndian::read_u32(&buf[4..8]);
-        } else {
-            return Err(EndiannessError);
+        // Parse endianness from the first 2-byte part of the header
+        match Header::endianness(&buf[..2]) {
+            Ok(endianness) => match endianness {
+                Endianness::BigEndian => {
+                    identifier = byte::BigEndian::read_u16(&buf[..2]);
+                    version = byte::BigEndian::read_u16(&buf[2..4]);
+                    ifd_offset = byte::BigEndian::read_u32(&buf[4..8]);
+                }
+                Endianness::LittleEndian => {
+                    identifier = byte::LittleEndian::read_u16(&buf[..2]);
+                    version = byte::LittleEndian::read_u16(&buf[2..4]);
+                    ifd_offset = byte::LittleEndian::read_u32(&buf[4..8]);
+                }
+            },
+            Err(_) => return Err(EndiannessError),
         }
 
+        // Verify that the file has a valid version identifier
+        // Should always be 42
         if version != 42 {
-            return Err(EndiannessError::from(io::Error::new(io::ErrorKind::Other, "invalid version")));
+            return Err(EndiannessError::from(io::Error::new(io::ErrorKind::Other, "invalid version identifier")));
         }
 
         return Ok(Header {
@@ -43,10 +65,17 @@ impl Header {
         });
     }
 
-    pub fn endianness(buffer: &[u8]) -> Result<Endianness, EndiannessError> {
-        return if TIFF_MM.iter().zip(buffer.iter()).all(|(a, b)| a == b) {
+    /// Parses TIFF standard endianness from a 2-byte buffer slice reference
+    /// Valid buffers are [0x49, 0x49] and [0x4D, 0x4D].
+    ///
+    /// # Arguments
+    ///
+    /// * `buf` - Buffer to be parsed as endianness.
+    ///
+    pub fn endianness(buf: &[u8]) -> Result<Endianness, EndiannessError> {
+        return if TIFF_MM.iter().zip(buf.iter()).all(|(a, b)| a == b) {
             Ok(Endianness::BigEndian)
-        } else if TIFF_II.iter().zip(buffer.iter()).all(|(a, b)| a == b) {
+        } else if TIFF_II.iter().zip(buf.iter()).all(|(a, b)| a == b) {
             Ok(Endianness::LittleEndian)
         } else {
             Err(EndiannessError)

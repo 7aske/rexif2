@@ -53,6 +53,7 @@ impl Tag {
             data,
         }
     }
+
     pub fn size(&self) -> usize {
         TagTypeSize::from(self.ttype as u16) as usize
     }

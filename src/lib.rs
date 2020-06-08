@@ -4,7 +4,7 @@ mod header;
 mod ifd;
 mod tag;
 mod tagtype;
-mod contants;
+mod constants;
 
 #[cfg(test)]
 mod tests {

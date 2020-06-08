@@ -1,16 +1,16 @@
 use crate::endianness::{LittleEndian, BigEndian, EndiannessError};
 use crate::endianness::Endianness;
 
-use crate::header::Header;
-use std::fs::File;
-use std::io::{Read, BufReader, SeekFrom, Seek};
 use byteorder as byte;
 use byteorder::ByteOrder;
-use crate::ifd::Ifd;
 use core::fmt;
-use crate::tagtype::{TagType, TagTypeSize};
-use std::process::exit;
+use crate::header::Header;
 use crate::header;
+use crate::ifd::Ifd;
+use crate::tagtype::{TagType, TagTypeSize};
+use std::fs::File;
+use std::io::{Read, BufReader, SeekFrom, Seek};
+use std::process::exit;
 
 pub struct Tiff {
     pub header: Header,
@@ -36,10 +36,11 @@ impl Tiff {
 
         let endianness = Header::endianness(&header_buffer[..2])?;
 
-        let header = Header::new(&header_buffer, endianness);
+        let header = Header::new(&header_buffer)?;
         let mut ifd = Ifd::new(&mut file_reader, endianness.clone(), offset);
         let mut tiff = Tiff::new(header, endianness.clone(), offset);
         let mut next_ptr = ifd.next_ifd_ptr() as u64;
+
         while next_ptr != 0 {
             file_reader.seek(SeekFrom::Start(next_ptr));
             tiff.files.push(ifd);
@@ -60,9 +61,8 @@ impl fmt::Debug for Tiff {
 #[derive(Debug, Clone)]
 pub struct TiffError;
 
-
 impl From<EndiannessError> for TiffError {
-    fn from(err: EndiannessError) -> Self {
+    fn from(_err: EndiannessError) -> Self {
         TiffError
     }
 }

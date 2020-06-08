@@ -91,3 +91,9 @@ impl Endian for LittleEndian {
 
 #[derive(Debug, Clone)]
 pub struct EndiannessError;
+
+impl From<io::Error> for EndiannessError {
+    fn from(_: Error) -> Self {
+       EndiannessError
+    }
+}

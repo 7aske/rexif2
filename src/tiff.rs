@@ -22,7 +22,7 @@ pub struct Tiff {
 
 /// Creates a structure representing a TIFF file
 impl Tiff {
-    pub fn new(header: Header, endianness: Endianness, offset: u64) -> Self {
+    fn new(header: Header, endianness: Endianness, offset: u64) -> Self {
         Tiff {
             header,
             files: vec![],
@@ -30,9 +30,11 @@ impl Tiff {
             offset,
         }
     }
+
     pub fn new_from_file(file: &mut File, offset: u64) -> Result<Tiff, TiffError> {
         let mut file_reader = BufReader::new(file);
         let mut header_buffer: [u8; 8] = [0; 8];
+        file_reader.seek(SeekFrom::Start(offset));
         file_reader.read(&mut header_buffer);
 
         let endianness = Header::endianness(&header_buffer[..2])?;
@@ -55,7 +57,7 @@ impl Tiff {
 
 impl fmt::Debug for Tiff {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{:?} Files: {:#?}", self.header, self.files)
+        write!(f, "{:?}\n[Files:{}\n{:?}", self.header, self.files.len(), self.files)
     }
 }
 

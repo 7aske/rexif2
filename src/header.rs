@@ -85,10 +85,10 @@ impl Header {
 
 impl fmt::Debug for Header {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        if self.identifier == 19789 {
-            write!(f, "{:?}{:?}{:#8}", self.identifier.to_be_bytes(), self.version.to_be_bytes(), self.ifd_offset)
-        } else if self.identifier == 18761 {
-            write!(f, "{:?}{:?}{:#8}", self.identifier.to_le_bytes(), self.version.to_le_bytes(), self.ifd_offset)
+        if self.identifier == 0x4d4d {
+            write!(f, "{:x?}{:x?}[{:#x}]", self.identifier.to_be_bytes(), self.version.to_be_bytes(), self.ifd_offset)
+        } else if self.identifier == 0x4949 {
+            write!(f, "{:x?}{:x?}[{:#x}]", self.identifier.to_le_bytes(), self.version.to_le_bytes(), self.ifd_offset)
         } else {
             Err(fmt::Error)
         }
@@ -104,7 +104,7 @@ mod tests {
     pub fn test_mm() {
         let buf = [0x4D, 0x4D, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x00];
         let mm_header = Header::new(&buf).expect("Failed to parse MM header.");
-        println!("Parsed identifier of value {:?} from buffer {:?}", mm_header.identifier, buf);
+        println!("Parsed identifier of value {:?} from buffer {:x?}", mm_header.identifier, buf);
         assert_eq!(mm_header.identifier, 0x4D4D);
         assert_eq!(mm_header.version, 42);
     }
@@ -113,7 +113,7 @@ mod tests {
     pub fn test_ii() {
         let buf = [0x49, 0x49, 0x2A, 0x00, 0x00, 0x00, 0x00, 0x00];
         let ii_header = Header::new(&buf).expect("Failed to parse II header.");
-        println!("Parsed identifier of value {:?} from buffer {:?}", ii_header.identifier, buf);
+        println!("Parsed identifier of value {:?} from buffer {:x?}", ii_header.identifier, buf);
         assert_eq!(ii_header.identifier, 0x4949);
         assert_eq!(ii_header.version, 42);
     }

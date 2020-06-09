@@ -85,6 +85,6 @@ impl Ifd {
 
 impl fmt::Debug for Ifd {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{:?}\nTags: {:#?}\n{}", self.num_dir_ent, self.tags, self.next_ifd)
+        write!(f, "Dirs:{:?}\n[Tags:\n            ID TYPE   NUM        OFF NAME{:#?}\n{}", self.num_dir_ent, self.tags, self.next_ifd)
     }
 }

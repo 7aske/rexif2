@@ -16,13 +16,13 @@ mod tests {
     fn test() {
         let now = Instant::now();
         let filename = "test/D3200.NEF";
-        let mut f = File::open(filename.to_string()).expect("Cannot open file.");
-//        let mut f = File::open("test/X100.RAF").expect("Cannot open file.");
-        // File offset to skip RAF header  - 160 (not implemented)
-        let file = Tiff::new_from_file(&mut f, 0).expect("Cannot parse TIFF file");
+        // let filename = "test/X10.RAF";
+        // let filename = "test/MIA1.JPG";
+        let mut file = File::open(filename.to_string()).expect("Cannot open file.");
+        let tiff = Tiff::new_from_file(&mut file, 0x00).expect("Cannot parse TIFF file");
         let now = now.elapsed();
-        println!("{:?}", file);
         println!("Time 0.{:#06}μs", now.as_micros());
+        println!("{:?}", tiff);
     }
 }
 
